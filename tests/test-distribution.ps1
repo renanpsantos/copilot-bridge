@@ -1,7 +1,7 @@
 param([Parameter(Mandatory=$true)][string]$ManifestPath)
 $ErrorActionPreference='Stop'
 . "$PSScriptRoot\..\LucyMcpUpdate.ps1" -Library
-$root=Join-Path ([IO.Path]::GetTempPath()) ('lucy-distribution-test-'+[Guid]::NewGuid().ToString('N'))
+$root=Join-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) ('work\dist-'+[Guid]::NewGuid().ToString('N').Substring(0,8))
 $install=Join-Path $root 'installed';$data=Join-Path $root 'profile'
 [void](New-Item -ItemType Directory -Force -Path $install,$data)
 [IO.File]::WriteAllText((Join-Path $install 'app-version.json'),'{"version":"0.0.0"}')
