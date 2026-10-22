@@ -1,0 +1,5 @@
+{
+  "name": "Lucy MCP",
+  "version": "0.3.0",
+  "release_notes": "Primeira distribuicao com versao visivel, verificacao do pacote e atualizacao por pasta corporativa sincronizada. Inclui a correcao de instancia unica do Xurrent."
+}

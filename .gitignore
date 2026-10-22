@@ -1,0 +1,10 @@
+node_modules/
+dist/
+outputs/
+*.log
+*.dpapi
+config.json
+processes.json
+version.json
+package-files.json
+LucyMcp.exe
