@@ -1,5 +1,10 @@
 # Historico de versoes
 
+## 0.3.2 - 2026-10-22
+
+- Logo de conexao no cabecalho e icone da janela, da barra de tarefas e do executavel.
+- Recursos locais leves; nao adiciona dependencias para mostrar o logo.
+
 ## 0.3.1 - 2026-10-22
 
 - Uma unica interface por usuario, sessao Windows e pasta de dados, mesmo abrindo de outra pasta de instalacao.

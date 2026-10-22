@@ -24,6 +24,7 @@ $form.MinimumSize=New-Object Drawing.Size(856,749)
 $form.StartPosition='CenterScreen'
 $form.Font=New-Object Drawing.Font('Segoe UI',10)
 $form.BackColor=[Drawing.Color]::FromArgb(245,247,250)
+$form.Icon=New-Object Drawing.Icon((Join-Path $PSScriptRoot 'logo.ico'))
 $form.AutoScaleMode='Dpi'
 function Label-At($parent,$text,$x,$y,$w=750,$h=26){
  $c=New-Object Windows.Forms.Label;$c.Text=$text;$c.SetBounds($x,$y,$w,$h);$parent.Controls.Add($c);return $c
@@ -46,10 +47,12 @@ function Pick-File($box){
  $d=New-Object Windows.Forms.OpenFileDialog;$d.Filter='ngrok (ngrok.exe)|ngrok.exe';$d.Title='Localizar ngrok.exe'
  try{if($d.ShowDialog($form) -eq 'OK'){$box.Text=$d.FileName}}finally{$d.Dispose()}
 }
-[void](Label-At $form 'Lucy MCP' 22 12 400 34)
-$form.Controls[0].Text='Lucy MCP v'+$appVersion
-$form.Controls[0].Font=New-Object Drawing.Font('Segoe UI',19,[Drawing.FontStyle]::Bold)
-[void](Label-At $form 'Configure uma vez. Inicie e pare a publicacao sem usar o terminal.' 24 51 780 25)
+$heading=Label-At $form ('Lucy MCP v'+$appVersion) 82 12 500 34
+$heading.Font=New-Object Drawing.Font('Segoe UI',19,[Drawing.FontStyle]::Bold)
+$logo=New-Object Windows.Forms.PictureBox;$logo.SetBounds(24,12,48,48);$logo.SizeMode='Zoom'
+$logo.Image=[Drawing.Image]::FromFile((Join-Path $PSScriptRoot 'logo.png'));$form.Controls.Add($logo)
+[void](Label-At $form 'Configure uma vez. Inicie e pare a publicacao sem usar o terminal.' 82 51 738 25)
+$form.Add_Disposed({if($logo.Image){$logo.Image.Dispose();$logo.Image=$null}})
 $tabs=New-Object Windows.Forms.TabControl;$tabs.SetBounds(18,85,804,555);$tabs.Anchor='Top,Bottom,Left,Right';$form.Controls.Add($tabs)
 $setupTab=New-Object Windows.Forms.TabPage;$setupTab.Text='1. Configuracao';$setupTab.BackColor=[Drawing.Color]::White
 $runTab=New-Object Windows.Forms.TabPage;$runTab.Text='2. Publicacao e Copilot';$runTab.BackColor=[Drawing.Color]::White

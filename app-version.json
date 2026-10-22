@@ -1,5 +1,5 @@
 {
   "name": "Lucy MCP",
-  "version": "0.3.1",
-  "release_notes": "Mantem uma unica janela por usuario e perfil. Ao abrir novamente, restaura e traz a interface existente para frente, inclusive a partir de outra copia da pasta."
+  "version": "0.3.2",
+  "release_notes": "Adiciona logo de conexao no cabecalho e icone do programa. Mantem a protecao de instancia unica e o atualizador por pasta corporativa."
 }
