@@ -1,5 +1,10 @@
 # Historico de versoes
 
+## 0.3.5 - 2026-10-22
+
+- Nome Copilot Bridge no titulo, cabecalho e caixas de mensagem.
+- Layout automatico do aviso e botao de resultado na aba Atualizacoes, eliminando a sobreposicao que cortava o texto.
+
 ## 0.3.4 - 2026-10-22
 
 - Executavel principal renomeado para CopilotBridge.exe, incluindo setup e reinicio apos atualizar.

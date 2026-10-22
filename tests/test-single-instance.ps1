@@ -12,7 +12,7 @@ public static class WindowProbe {
   EnumWindows(delegate(IntPtr handle,IntPtr state) {
    uint pid;GetWindowThreadProcessId(handle,out pid);
    var title=new System.Text.StringBuilder(256);GetWindowText(handle,title,title.Capacity);
-   if(pid==target && title.ToString().StartsWith("Lucy MCP v")) { result=handle;return false; }
+   if(pid==target && title.ToString().StartsWith("Copilot Bridge v")) { result=handle;return false; }
    return true;
   },IntPtr.Zero);
   return result;

@@ -1,8 +1,8 @@
-# Lucy MCP CLI — POC Windows
+# Copilot Bridge — Windows
 
 ## Versao e atualizacoes
 
-Esta distribuicao e a **v0.3.4**. A versao fica centralizada em `app-version.json` e aparece no titulo da janela, no status do CLI e nos diagnosticos do adaptador. O historico esta em `CHANGELOG.md`.
+Esta distribuicao e a **v0.3.5**. A versao fica centralizada em `app-version.json` e aparece no titulo da janela, no status do CLI e nos diagnosticos do adaptador. O historico esta em `CHANGELOG.md`.
 
 O executavel principal agora e `CopilotBridge.exe`. `setup.cmd` abre esse executavel. O arquivo `LucyMcp.exe` permanece apenas como pequeno iniciador de compatibilidade: ele abre `CopilotBridge.exe` para preservar atalhos e o reinicio dos atualizadores anteriores. Use o nome novo nos atalhos da equipe. O perfil de configuracoes continua em `%LOCALAPPDATA%\LucyMcpCli` e nao precisa ser recriado.
 

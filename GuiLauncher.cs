@@ -13,6 +13,6 @@ internal static class GuiLauncher {
    start.WorkingDirectory=root;start.UseShellExecute=false;start.CreateNoWindow=true;
    start.EnvironmentVariables["PSModulePath"]=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System),"WindowsPowerShell\\v1.0\\Modules")+";"+Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),"WindowsPowerShell\\Modules");
    Process.Start(start);
-  }catch(Exception error){MessageBox.Show(error.Message,"Lucy MCP",MessageBoxButtons.OK,MessageBoxIcon.Error);}
+  }catch(Exception error){MessageBox.Show(error.Message,"Copilot Bridge",MessageBoxButtons.OK,MessageBoxIcon.Error);}
  }
 }

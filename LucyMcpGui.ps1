@@ -1,9 +1,9 @@
-param([string]$DataDirectory=(Join-Path $env:LOCALAPPDATA 'LucyMcpCli'),[switch]$SmokeTest,[string]$PreviewPath,[switch]$ValidateGui)
+param([string]$DataDirectory=(Join-Path $env:LOCALAPPDATA 'LucyMcpCli'),[switch]$SmokeTest,[string]$PreviewPath,[switch]$ValidateGui,[ValidateRange(1,2)][double]$PreviewScale=1)
 $ErrorActionPreference='Stop'
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 $singleInstance=$null
-trap{if($singleInstance){$singleInstance.Dispose()};Write-Error -Message $_.Exception.Message -ErrorAction Continue;[void][Windows.Forms.MessageBox]::Show($_.Exception.Message,'Lucy MCP - falha ao abrir');exit 1}
+trap{if($singleInstance){$singleInstance.Dispose()};Write-Error -Message $_.Exception.Message -ErrorAction Continue;[void][Windows.Forms.MessageBox]::Show($_.Exception.Message,'Copilot Bridge - falha ao abrir');exit 1}
 if(!$SmokeTest){
  Add-Type -Path (Join-Path $PSScriptRoot 'SingleInstance.cs') -ReferencedAssemblies System.Windows.Forms,System.Core
  $singleInstance=New-Object LucySingleInstance($DataDirectory)
@@ -19,7 +19,7 @@ $script:updateSource=$githubManifest
 $script:updating=$false
 $updateSettingsFile=Join-Path $DataDirectory 'updates.json'
 $form=New-Object Windows.Forms.Form
-$form.Text='Lucy MCP v'+$appVersion+' | Configuracao e publicacao'
+$form.Text='Copilot Bridge v'+$appVersion+' | Configuracao e publicacao'
 $form.ClientSize=New-Object Drawing.Size(840,710)
 $form.MinimumSize=New-Object Drawing.Size(856,749)
 $form.StartPosition='CenterScreen'
@@ -37,7 +37,7 @@ function Text-At($parent,$x,$y,$w=570){
  $c=New-Object Windows.Forms.TextBox;$c.SetBounds($x,$y,$w,29);$parent.Controls.Add($c);return $c
 }
 function Notify($text,[bool]$error=$false){
- [void][Windows.Forms.MessageBox]::Show($form,$text,'Lucy MCP',[Windows.Forms.MessageBoxButtons]::OK,$(if($error){[Windows.Forms.MessageBoxIcon]::Error}else{[Windows.Forms.MessageBoxIcon]::Information}))
+ [void][Windows.Forms.MessageBox]::Show($form,$text,'Copilot Bridge',[Windows.Forms.MessageBoxButtons]::OK,$(if($error){[Windows.Forms.MessageBoxIcon]::Error}else{[Windows.Forms.MessageBoxIcon]::Information}))
 }
 function Pick-Folder($box){
  $d=New-Object Windows.Forms.FolderBrowserDialog;$d.Description='Selecione a pasta de instalacao ou do projeto'
@@ -48,7 +48,7 @@ function Pick-File($box){
  $d=New-Object Windows.Forms.OpenFileDialog;$d.Filter='ngrok (ngrok.exe)|ngrok.exe';$d.Title='Localizar ngrok.exe'
  try{if($d.ShowDialog($form) -eq 'OK'){$box.Text=$d.FileName}}finally{$d.Dispose()}
 }
-$heading=Label-At $form ('Lucy MCP v'+$appVersion) 82 12 500 34
+$heading=Label-At $form ('Copilot Bridge v'+$appVersion) 82 12 500 34
 $heading.Font=New-Object Drawing.Font('Segoe UI',19,[Drawing.FontStyle]::Bold)
 $logo=New-Object Windows.Forms.PictureBox;$logo.SetBounds(24,12,48,48);$logo.SizeMode='Zoom'
 $logo.Image=[Drawing.Image]::FromFile((Join-Path $PSScriptRoot 'logo.png'));$form.Controls.Add($logo)
@@ -117,8 +117,14 @@ $installUpdate=Button-At $updateTab 'Instalar e reiniciar' 276 176 240 40;$insta
 $githubSource=Button-At $updateTab 'Usar GitHub' 532 176 238 40
 $updateState=Label-At $updateTab 'Nenhuma verificacao realizada.' 20 238 750 50
 $updateNotes=New-Object Windows.Forms.TextBox;$updateNotes.Multiline=$true;$updateNotes.ReadOnly=$true;$updateNotes.ScrollBars='Vertical';$updateNotes.SetBounds(20,305,750,132);$updateTab.Controls.Add($updateNotes)
-[void](Label-At $updateTab 'A atualizacao encerra a publicacao. Configuracoes e tokens serao preservados.' 20 454 750 50)
-$updateLogButton=Button-At $updateTab 'Abrir resultado da atualizacao' 20 488 315
+$updateActions=New-Object Windows.Forms.FlowLayoutPanel
+$updateActions.SetBounds(20,450,750,76);$updateActions.FlowDirection='TopDown';$updateActions.WrapContents=$false
+$updateActions.AutoSize=$true;$updateActions.AutoSizeMode='GrowAndShrink';$updateTab.Controls.Add($updateActions)
+$updateWarning=Label-At $updateActions 'A atualizacao encerra a publicacao. Configuracoes e tokens serao preservados.' 0 0 750 26
+$updateWarning.AutoSize=$true;$updateWarning.MaximumSize=New-Object Drawing.Size(750,0)
+$updateWarning.Margin=New-Object Windows.Forms.Padding(0,0,0,10)
+$updateLogButton=Button-At $updateActions 'Abrir resultado da atualizacao' 0 0 330 36
+$updateLogButton.Margin=New-Object Windows.Forms.Padding(0)
 $footer=Label-At $form 'Pronto para configurar. Nenhuma publicacao e iniciada automaticamente.' 24 650 785 45;$footer.Anchor='Bottom,Left,Right'
 $script:formButtons=@($startButton,$stopButton,$saveButton,$ngrokInstall,$verifyButton,$checkUpdate,$selectSource,$githubSource)
 function Refresh-State {
@@ -225,7 +231,7 @@ $githubSource.Add_Click({try{
 }catch{Notify $_.Exception.Message $true}})
 $installUpdate.Add_Click({try{
  if(!$script:updateInfo.available){throw 'Verifique se ha uma versao nova primeiro.'}
- $confirm=[Windows.Forms.MessageBox]::Show($form,('Instalar v'+$script:updateInfo.version+' da fonte selecionada? A publicacao sera parada e esta janela sera reiniciada.'),'Atualizar Lucy MCP','YesNo','Question')
+ $confirm=[Windows.Forms.MessageBox]::Show($form,('Instalar v'+$script:updateInfo.version+' da fonte selecionada? A publicacao sera parada e esta janela sera reiniciada.'),'Atualizar Copilot Bridge','YesNo','Question')
  if($confirm -eq 'Yes'){Begin-Operation 'update-prepare'}
 }catch{Notify $_.Exception.Message $true}})
 $updateLogButton.Add_Click({$file=Join-Path $DataDirectory 'update-result.json';if(Test-Path -LiteralPath $file){Start-Process notepad.exe -ArgumentList ('"'+$file+'"')}else{Notify 'Nenhuma atualizacao aplicada ainda.'}})
@@ -308,7 +314,7 @@ $form.Add_FormClosing({param($sender,$e)
  if($script:operation){$e.Cancel=$true;Notify 'Aguarde a operacao terminar antes de fechar.';return}
  $state=Read-State
  if($state -and ((Owned-Process $state.bridge) -or (Owned-Process $state.ngrok))){
-  $choice=[Windows.Forms.MessageBox]::Show($form,'A publicacao continuara ativa ao fechar. Para encerra-la, cancele e use Parar publicacao. Fechar mesmo assim?','Lucy MCP','YesNo','Question')
+  $choice=[Windows.Forms.MessageBox]::Show($form,'A publicacao continuara ativa ao fechar. Para encerra-la, cancele e use Parar publicacao. Fechar mesmo assim?','Copilot Bridge','YesNo','Question')
   if($choice -ne 'Yes'){$e.Cancel=$true}
  }
 })
@@ -353,7 +359,18 @@ if($SmokeTest){
   Write-Output 'GUI update check passed: local manifest discovered and install button enabled.'
   Write-Output 'GUI validation passed: save, DPAPI, token clearing, URL rejection and asynchronous CLI status.'
  }
- if($PreviewPath){$form.Show();[Windows.Forms.Application]::DoEvents();$bitmap=New-Object Drawing.Bitmap($form.Width,$form.Height);try{$form.DrawToBitmap($bitmap,(New-Object Drawing.Rectangle(0,0,$form.Width,$form.Height)));$bitmap.Save($PreviewPath)}finally{$bitmap.Dispose()}}
+ if($PreviewPath){
+  $form.Show()
+  if($PreviewScale -ne 1){
+   $form.AutoScaleMode='None';$form.Scale((New-Object Drawing.SizeF($PreviewScale,$PreviewScale)))
+   $form.Font=New-Object Drawing.Font('Segoe UI',(10*$PreviewScale))
+   $heading.Font=New-Object Drawing.Font('Segoe UI',(19*$PreviewScale),[Drawing.FontStyle]::Bold)
+  }
+  [Windows.Forms.Application]::DoEvents();$updateActions.PerformLayout()
+  if($updateWarning.Bounds.IntersectsWith($updateLogButton.Bounds) -or !$updateActions.ClientRectangle.Contains($updateLogButton.Bounds)){throw 'Update result button overlaps or is clipped.'}
+  $bitmap=New-Object Drawing.Bitmap($form.Width,$form.Height)
+  try{$form.DrawToBitmap($bitmap,(New-Object Drawing.Rectangle(0,0,$form.Width,$form.Height)));$bitmap.Save($PreviewPath)}finally{$bitmap.Dispose()}
+ }
  $timer.Dispose();$form.Dispose();Write-Output 'GUI constructed successfully. No MCP publication or tunnel started.';return
 }
 $timer.Start()

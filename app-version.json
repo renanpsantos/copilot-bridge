@@ -1,5 +1,5 @@
 {
-  "name": "Lucy MCP",
-  "version": "0.3.4",
-  "release_notes": "Executavel principal renomeado para CopilotBridge.exe. Preserva configuracoes, atualizacao pelo GitHub e compatibilidade com iniciadores das versoes anteriores."
+  "name": "Copilot Bridge",
+  "version": "0.3.5",
+  "release_notes": "Titulo e cabecalho corrigidos para Copilot Bridge. Corrige a sobreposicao que cortava o botao Abrir resultado da atualizacao."
 }
