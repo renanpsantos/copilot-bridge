@@ -2,7 +2,9 @@
 
 ## Versao e atualizacoes
 
-Esta distribuicao e a **v0.3.3**. A versao fica centralizada em `app-version.json` e aparece no titulo da janela, no status do CLI e nos diagnosticos do adaptador. O historico esta em `CHANGELOG.md`.
+Esta distribuicao e a **v0.3.4**. A versao fica centralizada em `app-version.json` e aparece no titulo da janela, no status do CLI e nos diagnosticos do adaptador. O historico esta em `CHANGELOG.md`.
+
+O executavel principal agora e `CopilotBridge.exe`. `setup.cmd` abre esse executavel. O arquivo `LucyMcp.exe` permanece apenas como pequeno iniciador de compatibilidade: ele abre `CopilotBridge.exe` para preservar atalhos e o reinicio dos atualizadores anteriores. Use o nome novo nos atalhos da equipe. O perfil de configuracoes continua em `%LOCALAPPDATA%\LucyMcpCli` e nao precisa ser recriado.
 
 O repositorio publico e https://github.com/renanpsantos/copilot-bridge. A partir da v0.3.3, a aba Atualizacoes consulta o GitHub por padrao, sem login ou token. Clique Verificar atualizacoes e, quando houver uma versao mais nova, Instalar e reiniciar. Para voltar ao GitHub depois de usar uma pasta, clique Usar GitHub. O manifesto fica em https://github.com/renanpsantos/copilot-bridge/releases/latest/download/version.json; nao e necessario um Gist. Cada manifesto gerado pelo build aponta para o ZIP da versao exata, evitando misturar releases durante o download.
 
@@ -10,7 +12,7 @@ Para migrar de v0.3.2 ou anterior, extraia uma vez o novo ZIP completo ou use a 
 
 A interface permite uma unica janela por usuario, sessao Windows e pasta de dados. Abrir novamente pelo executavel ou atalho traz a janela existente para frente e restaura se estiver minimizada. Isso tambem vale para outra copia da instalacao usando o mesmo perfil. Fechar a janela permite uma nova abertura normal. Essa protecao esta disponivel a partir da v0.3.1; feche janelas de versoes anteriores antes de instalar.
 
-Para instalar esta primeira versao com atualizador, pare a publicacao, feche a interface e extraia o ZIP completo em uma pasta local nova. Abra `LucyMcp.exe` e use Verificar pacote. As configuracoes do mesmo usuario Windows continuam em `%LOCALAPPDATA%\LucyMcpCli`; nao e necessario repetir o onboarding.
+Para instalar esta primeira versao com atualizador, pare a publicacao, feche a interface e extraia o ZIP completo em uma pasta local nova. Abra `CopilotBridge.exe` e use Verificar pacote. As configuracoes do mesmo usuario Windows continuam em `%LOCALAPPDATA%\LucyMcpCli`; nao e necessario repetir o onboarding.
 
 Na aba **3. Atualizacoes**, clique Escolher e selecione o arquivo `version.json` na pasta corporativa sincronizada pelo OneDrive/SharePoint. Cada usuario seleciona seu caminho local; a pasta nao precisa ter a mesma localizacao nas outras maquinas. Clique Verificar atualizacoes. Quando houver uma versao maior, leia as notas e use Instalar e reiniciar.
 
@@ -30,7 +32,7 @@ O codigo-fonte e controlado em Git; o build e reproduzido pelo script e cada rel
 
 ## Interface para a equipe
 
-Extraia o ZIP inteiro e abra **LucyMcp.exe** com duplo clique. O executavel e um lancador de 5 KB; a interface usa Windows Forms e o Windows PowerShell 5.1 ja disponiveis no Windows, sem Electron ou navegador embutido. O pacote continua incluindo o adaptador Node e suas dependencias. O executavel nao e assinado; a politica de aplicativos da empresa pode exigir liberacao pela TI.
+Extraia o ZIP inteiro e abra **CopilotBridge.exe** com duplo clique. O executavel e um lancador leve; a interface usa Windows Forms e o Windows PowerShell 5.1 ja disponiveis no Windows, sem Electron ou navegador embutido. O pacote continua incluindo o adaptador Node e suas dependencias. O executavel nao e assinado; a politica de aplicativos da empresa pode exigir liberacao pela TI.
 
 Na aba Configuracao, selecione a pasta da Lucy e localize ou instale ngrok. Use Abrir site / obter token, copie o campo Authtoken e clique Colar. Se ja configurou neste usuario Windows, deixe o campo vazio para manter o token salvo. Se desejar, informe o nome da conexao SAP; este campo permite digitacao e ainda nao consulta automaticamente as conexoes da Lucy. Xurrent e opcional: marque a opcao e selecione a pasta com iniciar-mcp.bat. O link do agente tambem e opcional.
 
@@ -38,7 +40,7 @@ Clique Salvar e continuar. Na aba Publicacao, conecte a VPN manualmente e use In
 
 O status mostra adaptador, tunel e contagem das ferramentas. Abrir log abre o arquivo da inicializacao. Configuracoes existentes do CLI sao reutilizadas no mesmo perfil Windows; nao precisa repetir onboarding. O atalho setup.cmd tambem abre a interface. LucyMcpGui.cmd e uma alternativa de inicializacao com console para diagnostico; o CLI tradicional continua disponivel para uso avancado.
 
-Se aparecer ERR_MODULE_NOT_FOUND para um arquivo em node_modules, a instalacao esta incompleta ou o arquivo foi removido. Pare a publicacao, feche a interface e extraia o ZIP COMPLETO diretamente numa pasta nova, evitando mover milhares de arquivos depois da extracao. Abra LucyMcp.exe dentro da pasta nova e use Verificar pacote antes de iniciar. Essa verificacao tambem roda automaticamente no start, identifica arquivos obrigatorios ausentes e carrega a arvore real de dependencias sem iniciar Lucy, Xurrent ou tunel. Nao e necessario repetir o onboarding no mesmo usuario Windows. Se o arquivo continuar ausente apos extrair, confirme o historico de protecao com a TI; nao desabilite o antivirus.
+Se aparecer ERR_MODULE_NOT_FOUND para um arquivo em node_modules, a instalacao esta incompleta ou o arquivo foi removido. Pare a publicacao, feche a interface e extraia o ZIP COMPLETO diretamente numa pasta nova, evitando mover milhares de arquivos depois da extracao. Abra CopilotBridge.exe dentro da pasta nova e use Verificar pacote antes de iniciar. Essa verificacao tambem roda automaticamente no start, identifica arquivos obrigatorios ausentes e carrega a arvore real de dependencias sem iniciar Lucy, Xurrent ou tunel. Nao e necessario repetir o onboarding no mesmo usuario Windows. Se o arquivo continuar ausente apos extrair, confirme o historico de protecao com a TI; nao desabilite o antivirus.
 
 Validacao da interface: criacao das tres abas, salvamento em perfil de teste, protecao DPAPI, limpeza do campo token, rejeicao de link Copilot invalido e comando status em segundo plano. O fluxo visual de instalacao ngrok/primeiro start em outro computador ainda requer teste piloto.
 
@@ -46,7 +48,7 @@ Extraia o ZIP inteiro em uma pasta local. Precisa de dLucy instalada e configura
 
 ## Uso no terminal, na pasta extraida
 
-Para o assistente de texto, execute `lucy-mcp.cmd setup`. Ele mostra uma etapa por tela: apos validar, pressione Enter para continuar e limpar a tela. No CMD, digite A quando solicitado para abrir o site no navegador, sem depender de Ctrl+clique. Copie somente o campo Authtoken, e nao o comando completo do site. Para a equipe, prefira LucyMcp.exe ou setup.cmd, que abrem a interface grafica.
+Para o assistente de texto, execute `lucy-mcp.cmd setup`. Ele mostra uma etapa por tela: apos validar, pressione Enter para continuar e limpar a tela. No CMD, digite A quando solicitado para abrir o site no navegador, sem depender de Ctrl+clique. Copie somente o campo Authtoken, e nao o comando completo do site. Para a equipe, prefira CopilotBridge.exe ou setup.cmd, que abrem a interface grafica.
 
 ```powershell
 .\lucy-mcp.cmd setup

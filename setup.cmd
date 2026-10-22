@@ -1,2 +1,2 @@
 @echo off
-start "" "%~dp0LucyMcp.exe"
+start "" "%~dp0CopilotBridge.exe"

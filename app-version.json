@@ -1,5 +1,5 @@
 {
   "name": "Lucy MCP",
-  "version": "0.3.3",
-  "release_notes": "Atualizacoes diretas pelo GitHub publico, sem login dos N1, com verificacao SHA-256. Mantem a opcao de pasta corporativa, o logo e a interface unica."
+  "version": "0.3.4",
+  "release_notes": "Executavel principal renomeado para CopilotBridge.exe. Preserva configuracoes, atualizacao pelo GitHub e compatibilidade com iniciadores das versoes anteriores."
 }

@@ -8,6 +8,13 @@ function Update-Version([string]$Text){
  return New-Object Version([int]$Matches[1],[int]$Matches[2],$patch)
 }
 function Update-Json($Value,[string]$Path){[IO.File]::WriteAllText($Path,($Value|ConvertTo-Json -Depth 12))}
+function Update-Launcher([string]$InstallPath){
+ foreach($name in @('CopilotBridge.exe','LucyMcp.exe')){
+  $launcher=Join-Path $InstallPath $name
+  if(Test-Path -LiteralPath $launcher -PathType Leaf){return $launcher}
+ }
+ throw 'Executavel do Copilot Bridge nao encontrado na instalacao.'
+}
 function Update-RemoteUri([string]$Url){
  $uri=$null
  if(![Uri]::TryCreate($Url,[UriKind]::Absolute,[ref]$uri) -or $uri.Scheme -ne 'https' -or $uri.UserInfo -or !$uri.IsDefaultPort){throw 'Fonte remota invalida. Use HTTPS do repositorio copilot-bridge.'}
@@ -88,6 +95,7 @@ function Test-UpdateInventory([string]$StagePath,[string]$ExpectedVersion){
  foreach($required in @('LucyMcp.exe','LucyMcpGui.ps1','LucyMcp.ps1','bridge.mjs','app-version.json','verify-package.mjs','xurrent-bat-transport.mjs','LucyMcpUpdate.ps1','SingleInstance.cs')){
   if(!$seen.ContainsKey($required)){throw ('Pacote incompleto: '+$required)}
  }
+ if((Update-Version $ExpectedVersion) -ge [version]'0.3.4' -and !$seen.ContainsKey('CopilotBridge.exe')){throw 'Pacote incompleto: CopilotBridge.exe'}
  foreach($file in Get-ChildItem -LiteralPath $StagePath -File -Recurse){
   $name=$file.FullName.Substring($StagePath.TrimEnd('\').Length+1).Replace('\','/')
   if($name -ne 'package-files.json' -and !$seen.ContainsKey($name)){throw ('Arquivo nao inventariado: '+$name)}
@@ -133,7 +141,8 @@ function Apply-Update($Plan,[int]$GuiPid=0,[string]$GuiStarted='', [switch]$NoRe
  $work=[IO.Path]::GetFullPath($Plan.workPath).TrimEnd('\')
  if(!$work.StartsWith($updates,[StringComparison]::OrdinalIgnoreCase) -or $stage -ne (Join-Path $work 'extracted\LucyMcpCli') -or $stage.StartsWith($install+'\',[StringComparison]::OrdinalIgnoreCase)){throw 'Area temporaria de atualizacao invalida.'}
  if($data -eq $install -or $data.StartsWith($install+'\',[StringComparison]::OrdinalIgnoreCase)){throw 'A pasta de dados deve estar fora da instalacao.'}
- if(!(Test-Path -LiteralPath (Join-Path $install 'LucyMcp.exe')) -or !(Test-Path -LiteralPath (Join-Path $install 'LucyMcp.ps1'))){throw 'Pasta de instalacao invalida.'}
+ if(!(Test-Path -LiteralPath (Join-Path $install 'LucyMcp.ps1'))){throw 'Pasta de instalacao invalida.'}
+ [void](Update-Launcher $install)
  $inventory=Test-UpdateInventory $stage $Plan.version
  if($GuiPid){
   $deadline=[DateTime]::UtcNow.AddSeconds(45)
@@ -175,7 +184,7 @@ function Apply-Update($Plan,[int]$GuiPid=0,[string]$GuiStarted='', [switch]$NoRe
   throw ('Atualizacao cancelada; arquivos anteriores restaurados. '+$originalError.Exception.Message)
  }
  Update-Json @{ok=$true;version=$Plan.version;changedFiles=$changed.Count;backupPath=$backup;time=[DateTime]::UtcNow.ToString('o')} (Join-Path $data 'update-result.json')
- if(!$NoRestart){Start-Process -FilePath (Join-Path $install 'LucyMcp.exe') -WindowStyle Hidden}
+ if(!$NoRestart){Start-Process -FilePath (Update-Launcher $install) -WindowStyle Hidden}
  return @{changedFiles=$changed.Count;backupPath=$backup}
 }
 if($Library){return}
@@ -195,7 +204,7 @@ try{
   Update-Json @{ok=$false;error=$_.Exception.Message} $request.responsePath
   if($request.action -eq 'apply'){
    Update-Json @{ok=$false;error=$_.Exception.Message;time=[DateTime]::UtcNow.ToString('o')} (Join-Path $request.plan.dataDirectory 'update-result.json')
-   if(Test-Path -LiteralPath (Join-Path $request.plan.installPath 'LucyMcp.exe')){Start-Process -FilePath (Join-Path $request.plan.installPath 'LucyMcp.exe') -WindowStyle Hidden}
+   try{Start-Process -FilePath (Update-Launcher $request.plan.installPath) -WindowStyle Hidden}catch{Write-Output 'Abra CopilotBridge.exe manualmente para conferir o resultado.'}
   }
  }
  Write-Output ('Atualizacao falhou: '+$_.Exception.Message)

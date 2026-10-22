@@ -1,5 +1,11 @@
 # Historico de versoes
 
+## 0.3.4 - 2026-10-22
+
+- Executavel principal renomeado para CopilotBridge.exe, incluindo setup e reinicio apos atualizar.
+- LucyMcp.exe funciona apenas como iniciador de compatibilidade para atalhos e atualizadores antigos.
+- Perfil de dados e protecao de instancia unica preservados.
+
 ## 0.3.3 - 2026-10-22
 
 - Atualizacao direta pelo GitHub publico, sem conta ou token dos N1.

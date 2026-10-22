@@ -20,7 +20,12 @@ foreach($dependency in @('@modelcontextprotocol\sdk','express')){
 $compiler=Join-Path $env:SystemRoot 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 if(!(Test-Path -LiteralPath $compiler)){$compiler=Join-Path $env:SystemRoot 'Microsoft.NET\Framework\v4.0.30319\csc.exe'}
 Push-Location $source
-try{& $compiler /nologo /target:winexe /reference:System.Windows.Forms.dll /win32icon:logo.ico /out:LucyMcp.exe GuiLauncher.cs;if($LASTEXITCODE -ne 0){throw 'Falha ao compilar o lancador.'}}finally{Pop-Location}
+try{
+ & $compiler /nologo /target:winexe /reference:System.Windows.Forms.dll /win32icon:logo.ico /out:CopilotBridge.exe GuiLauncher.cs
+ if($LASTEXITCODE -ne 0){throw 'Falha ao compilar CopilotBridge.exe.'}
+ & $compiler /nologo /target:winexe /reference:System.Windows.Forms.dll /win32icon:logo.ico /out:LucyMcp.exe LegacyLauncher.cs
+ if($LASTEXITCODE -ne 0){throw 'Falha ao compilar o iniciador de compatibilidade.'}
+}finally{Pop-Location}
 $files=New-Object Collections.Generic.List[object]
 foreach($file in Get-ChildItem -LiteralPath $source -File){
  if($file.Name -in @('package-files.json','version.json','build.ps1','generate-logo.ps1','.gitignore')){continue}
