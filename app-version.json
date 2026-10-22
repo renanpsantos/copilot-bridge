@@ -1,5 +1,5 @@
 {
   "name": "Lucy MCP",
-  "version": "0.3.0",
-  "release_notes": "Primeira distribuicao com versao visivel, verificacao do pacote e atualizacao por pasta corporativa sincronizada. Inclui a correcao de instancia unica do Xurrent."
+  "version": "0.3.1",
+  "release_notes": "Mantem uma unica janela por usuario e perfil. Ao abrir novamente, restaura e traz a interface existente para frente, inclusive a partir de outra copia da pasta."
 }

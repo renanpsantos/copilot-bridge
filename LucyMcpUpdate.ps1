@@ -44,7 +44,7 @@ function Test-UpdateInventory([string]$StagePath,[string]$ExpectedVersion){
   if($file.sha256 -notmatch '^[a-fA-F0-9]{64}$' -or !(Test-Path -LiteralPath $target -PathType Leaf)){throw ('Arquivo ausente ou invalido no pacote: '+$name)}
   if((Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash -ne $file.sha256){throw ('Integridade do arquivo invalida: '+$name)}
  }
- foreach($required in @('LucyMcp.exe','LucyMcpGui.ps1','LucyMcp.ps1','bridge.mjs','app-version.json','verify-package.mjs','xurrent-bat-transport.mjs','LucyMcpUpdate.ps1')){
+ foreach($required in @('LucyMcp.exe','LucyMcpGui.ps1','LucyMcp.ps1','bridge.mjs','app-version.json','verify-package.mjs','xurrent-bat-transport.mjs','LucyMcpUpdate.ps1','SingleInstance.cs')){
   if(!$seen.ContainsKey($required)){throw ('Pacote incompleto: '+$required)}
  }
  foreach($file in Get-ChildItem -LiteralPath $StagePath -File -Recurse){

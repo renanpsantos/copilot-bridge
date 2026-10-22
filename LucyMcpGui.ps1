@@ -2,7 +2,13 @@ param([string]$DataDirectory=(Join-Path $env:LOCALAPPDATA 'LucyMcpCli'),[switch]
 $ErrorActionPreference='Stop'
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
-trap{[void][Windows.Forms.MessageBox]::Show($_.Exception.Message,'Lucy MCP - falha ao abrir');exit 1}
+$singleInstance=$null
+trap{if($singleInstance){$singleInstance.Dispose()};Write-Error -Message $_.Exception.Message -ErrorAction Continue;[void][Windows.Forms.MessageBox]::Show($_.Exception.Message,'Lucy MCP - falha ao abrir');exit 1}
+if(!$SmokeTest){
+ Add-Type -Path (Join-Path $PSScriptRoot 'SingleInstance.cs') -ReferencedAssemblies System.Windows.Forms,System.Core
+ $singleInstance=New-Object LucySingleInstance($DataDirectory)
+ if(!$singleInstance.IsPrimary){try{$singleInstance.ActivateExisting()}finally{$singleInstance.Dispose()};return}
+}
 [Windows.Forms.Application]::EnableVisualStyles()
 . (Join-Path $PSScriptRoot 'LucyMcp.ps1') -Library -DataDirectory $DataDirectory
 $script:operation=$null
@@ -240,6 +246,7 @@ if(Test-Path -LiteralPath (Join-Path $DataDirectory 'update-result.json')){
 $timer=New-Object Windows.Forms.Timer;$timer.Interval=1000
 $timer.Add_Tick({
  try{
+ if($singleInstance -and $singleInstance.HasActivation()){$singleInstance.ShowExisting($form)}
  if($script:operation){
   $op=$script:operation
   if($op.process.HasExited){
@@ -324,7 +331,8 @@ if($SmokeTest){
   if($operationBox.Text -notlike '*Adaptador:*parado*'){throw 'CLI status output not shown'}
   $testManifest=Join-Path $DataDirectory 'version-test.json'
   [IO.File]::WriteAllText((Join-Path $DataDirectory 'fixture.zip'),'fixture')
-  Save-Json @{version='0.3.1';package='fixture.zip';sha256=('0'*64);release_notes='Fixture update'} $testManifest
+  $fixtureVersion=([version]$appVersion).Major.ToString()+'.'+([version]$appVersion).Minor+'.'+(([version]$appVersion).Build+1)
+  Save-Json @{version=$fixtureVersion;package='fixture.zip';sha256=('0'*64);release_notes='Fixture update'} $testManifest
   $script:updateSource=$testManifest
   Begin-Operation 'update-check'
   $deadline=[DateTime]::UtcNow.AddSeconds(20)
@@ -338,4 +346,4 @@ if($SmokeTest){
  $timer.Dispose();$form.Dispose();Write-Output 'GUI constructed successfully. No MCP publication or tunnel started.';return
 }
 $timer.Start()
-try{[void]$form.ShowDialog()}finally{$timer.Stop();$timer.Dispose();$form.Dispose()}
+try{[void]$form.ShowDialog()}finally{$timer.Stop();$timer.Dispose();$form.Dispose();if($singleInstance){$singleInstance.Dispose()}}

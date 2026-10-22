@@ -1,5 +1,11 @@
 # Historico de versoes
 
+## 0.3.1 - 2026-10-22
+
+- Uma unica interface por usuario, sessao Windows e pasta de dados, mesmo abrindo de outra pasta de instalacao.
+- Segunda abertura restaura a janela minimizada e solicita foco para a janela existente.
+- Fechar a interface libera a instancia para abrir normalmente depois; encerramento inesperado nao deixa arquivo de bloqueio.
+
 ## 0.3.0 - 2026-10-22
 
 - Versao centralizada e exibida na interface, no status e nos logs de inicializacao.

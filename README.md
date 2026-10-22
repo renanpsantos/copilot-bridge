@@ -2,7 +2,9 @@
 
 ## Versao e atualizacoes pela pasta corporativa
 
-Esta distribuicao e a **v0.3.0**. A versao fica centralizada em `app-version.json` e aparece no titulo da janela, no status do CLI e nos diagnosticos do adaptador. O historico esta em `CHANGELOG.md`.
+Esta distribuicao e a **v0.3.1**. A versao fica centralizada em `app-version.json` e aparece no titulo da janela, no status do CLI e nos diagnosticos do adaptador. O historico esta em `CHANGELOG.md`.
+
+A interface permite uma unica janela por usuario, sessao Windows e pasta de dados. Abrir novamente pelo executavel ou atalho traz a janela existente para frente e restaura se estiver minimizada. Isso tambem vale para outra copia da instalacao usando o mesmo perfil. Fechar a janela permite uma nova abertura normal. Essa protecao esta disponivel a partir da v0.3.1; feche janelas de versoes anteriores antes de instalar.
 
 Para instalar esta primeira versao com atualizador, pare a publicacao, feche a interface e extraia o ZIP completo em uma pasta local nova. Abra `LucyMcp.exe` e use Verificar pacote. As configuracoes do mesmo usuario Windows continuam em `%LOCALAPPDATA%\LucyMcpCli`; nao e necessario repetir o onboarding.
 

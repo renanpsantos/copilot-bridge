@@ -5,7 +5,7 @@ $install=Join-Path $root 'installed';$feed=Join-Path $root 'corporate feed';$dat
 [void](New-Item -ItemType Directory -Force -Path $install,$feed,$data)
 function Make-Release([string]$Version){
  $release=Join-Path $root ('source-'+$Version);[void](New-Item -ItemType Directory -Path $release)
- foreach($name in @('LucyMcp.exe','LucyMcpGui.ps1','LucyMcp.ps1','bridge.mjs','verify-package.mjs','xurrent-bat-transport.mjs','LucyMcpUpdate.ps1')){
+ foreach($name in @('LucyMcp.exe','LucyMcpGui.ps1','LucyMcp.ps1','bridge.mjs','verify-package.mjs','xurrent-bat-transport.mjs','LucyMcpUpdate.ps1','SingleInstance.cs')){
   $text='fixture '+$Version
   if($name -eq 'LucyMcp.ps1'){$text='exit 0'}
   [IO.File]::WriteAllText((Join-Path $release $name),$text)

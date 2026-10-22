@@ -81,7 +81,7 @@ function Load-Config {
 }
 function Test-Package([string]$NodePath){
  try{
- $required=@('app-version.json','bridge.mjs','xurrent-bat-transport.mjs','verify-package.mjs',
+ $required=@('app-version.json','SingleInstance.cs','bridge.mjs','xurrent-bat-transport.mjs','verify-package.mjs',
   'node_modules\express\index.js',
   'node_modules\@modelcontextprotocol\sdk\dist\esm\client\index.js',
   'node_modules\@modelcontextprotocol\sdk\dist\esm\client\stdio.js',
