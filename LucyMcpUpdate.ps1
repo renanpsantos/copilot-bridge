@@ -8,6 +8,39 @@ function Update-Version([string]$Text){
  return New-Object Version([int]$Matches[1],[int]$Matches[2],$patch)
 }
 function Update-Json($Value,[string]$Path){[IO.File]::WriteAllText($Path,($Value|ConvertTo-Json -Depth 12))}
+function Update-RemoteUri([string]$Url){
+ $uri=$null
+ if(![Uri]::TryCreate($Url,[UriKind]::Absolute,[ref]$uri) -or $uri.Scheme -ne 'https' -or $uri.UserInfo -or !$uri.IsDefaultPort){throw 'Fonte remota invalida. Use HTTPS do repositorio copilot-bridge.'}
+ $valid=($uri.Host -eq 'github.com' -and $uri.AbsolutePath.StartsWith('/renanpsantos/copilot-bridge/',[StringComparison]::OrdinalIgnoreCase)) -or ($uri.Host -eq 'raw.githubusercontent.com' -and $uri.AbsolutePath.StartsWith('/renanpsantos/copilot-bridge/',[StringComparison]::OrdinalIgnoreCase))
+ if(!$valid){throw 'A fonte remota deve pertencer ao repositorio renanpsantos/copilot-bridge.'}
+ return $uri
+}
+function Receive-UpdateRemote([string]$Url,[string]$Destination,[long]$MaxBytes){
+ $uri=Update-RemoteUri $Url
+ [Net.ServicePointManager]::SecurityProtocol=[Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+ for($redirect=0;$redirect -le 8;$redirect++){
+  $request=[Net.HttpWebRequest]::Create($uri);$request.AllowAutoRedirect=$false;$request.Timeout=30000;$request.ReadWriteTimeout=30000;$request.UserAgent='LucyMcp-Updater'
+  $response=$null
+  try{$response=$request.GetResponse()}catch{throw 'Nao foi possivel baixar a atualizacao do GitHub. Confira a internet e a disponibilidade da release.'}
+  try{
+   if([int]$response.StatusCode -in @(301,302,303,307,308)){
+    $uri=New-Object Uri($uri,$response.Headers['Location'])
+    if($uri.Scheme -ne 'https' -or $uri.UserInfo -or !$uri.IsDefaultPort -or $uri.Host -notin @('github.com','raw.githubusercontent.com','release-assets.githubusercontent.com','objects.githubusercontent.com')){throw 'Redirecionamento de download nao autorizado.'}
+    continue
+   }
+   if($response.ContentLength -gt $MaxBytes){throw 'Download excede o tamanho permitido.'}
+   $inputStream=$response.GetResponseStream()
+   $outputStream=if($Destination){[IO.File]::Create($Destination)}else{New-Object IO.MemoryStream}
+   try{
+    $buffer=New-Object byte[] 65536;$total=0L
+    while(($read=$inputStream.Read($buffer,0,$buffer.Length)) -gt 0){$total+=$read;if($total -gt $MaxBytes){throw 'Download excede o tamanho permitido.'};$outputStream.Write($buffer,0,$read)}
+    if(!$Destination){return [Text.Encoding]::UTF8.GetString($outputStream.ToArray()).TrimStart([char]0xfeff)}
+   }finally{$inputStream.Dispose();$outputStream.Dispose()}
+   return
+  }finally{$response.Dispose()}
+ }
+ throw 'Quantidade excessiva de redirecionamentos no download.'
+}
 function Update-ChildPath([string]$Root,[string]$Relative){
  $relativePath=$Relative.Replace('\','/')
  if(!$relativePath -or $relativePath -match '[:\x00-\x1f]' -or $relativePath.StartsWith('/') -or @($relativePath.Split('/')|Where-Object {$_ -eq '..' -or $_ -eq '.'}).Count){throw 'Caminho inseguro dentro do pacote.'}
@@ -17,16 +50,24 @@ function Update-ChildPath([string]$Root,[string]$Relative){
  return $target
 }
 function Get-UpdateInfo([string]$ManifestPath,[string]$InstallPath){
- $manifestFile=Get-Item -LiteralPath $ManifestPath -ErrorAction Stop
- if($manifestFile.PSIsContainer -or $manifestFile.Length -gt 1048576){throw 'Selecione um version.json valido na pasta corporativa sincronizada.'}
- $manifest=Get-Content -Raw -LiteralPath $manifestFile.FullName|ConvertFrom-Json
+ $remote=$ManifestPath -match '^https?://'
+ if($remote){$manifest=(Receive-UpdateRemote $ManifestPath '' 1048576)|ConvertFrom-Json}else{
+  $manifestFile=Get-Item -LiteralPath $ManifestPath -ErrorAction Stop
+  if($manifestFile.PSIsContainer -or $manifestFile.Length -gt 1048576){throw 'Selecione um version.json valido na pasta corporativa sincronizada.'}
+  $manifest=Get-Content -Raw -LiteralPath $manifestFile.FullName|ConvertFrom-Json
+  $ManifestPath=$manifestFile.FullName
+ }
  $latest=Update-Version $manifest.version
  $installed=(Get-Content -Raw -LiteralPath (Join-Path $InstallPath 'app-version.json')|ConvertFrom-Json).version
  $current=Update-Version $installed
  if($manifest.sha256 -notmatch '^[a-fA-F0-9]{64}$'){throw 'Manifesto sem SHA-256 valido do ZIP.'}
  if(!$manifest.package -or $manifest.package -notmatch '\.zip$'){throw 'Manifesto sem nome de pacote ZIP.'}
- $zip=Update-ChildPath $manifestFile.DirectoryName $manifest.package
- return [pscustomobject]@{version=$manifest.version;current=$installed;available=($latest -gt $current);release_notes=[string]$manifest.release_notes;sha256=$manifest.sha256;packagePath=$zip;manifestPath=$manifestFile.FullName}
+ if($remote){
+  if($manifest.package -ne 'LucyMcpCli-fixed-portable.zip'){throw 'Nome de pacote remoto invalido.'}
+  $downloadUrl=if($manifest.download_url){[string]$manifest.download_url}else{(New-Object Uri((Update-RemoteUri $ManifestPath),$manifest.package)).AbsoluteUri}
+  $zip=(Update-RemoteUri $downloadUrl).AbsoluteUri
+ }else{$zip=Update-ChildPath $manifestFile.DirectoryName $manifest.package}
+ return [pscustomobject]@{version=$manifest.version;current=$installed;available=($latest -gt $current);release_notes=[string]$manifest.release_notes;sha256=$manifest.sha256;packagePath=$zip;manifestPath=$ManifestPath;remote=$remote}
 }
 function Test-UpdateInventory([string]$StagePath,[string]$ExpectedVersion){
  $inventory=Get-Content -Raw -LiteralPath (Join-Path $StagePath 'package-files.json')|ConvertFrom-Json
@@ -56,11 +97,11 @@ function Test-UpdateInventory([string]$StagePath,[string]$ExpectedVersion){
 function Prepare-Update([string]$ManifestPath,[string]$InstallPath,[string]$DataDirectory){
  $info=Get-UpdateInfo $ManifestPath $InstallPath
  if(!$info.available){throw 'Nao ha versao mais nova para instalar.'}
- $zipInfo=Get-Item -LiteralPath $info.packagePath
- if($zipInfo.Length -gt 104857600){throw 'Pacote excede o limite de 100 MB.'}
+ if(!$info.remote){$zipInfo=Get-Item -LiteralPath $info.packagePath;if($zipInfo.Length -gt 104857600){throw 'Pacote excede o limite de 100 MB.'}}
  $updates=Join-Path $DataDirectory 'updates';[void](New-Item -ItemType Directory -Force -Path $updates)
  $work=Join-Path $updates ([Guid]::NewGuid().ToString('N'));[void](New-Item -ItemType Directory -Path $work)
- $cachedZip=Join-Path $work 'package.zip';Copy-Item -LiteralPath $zipInfo.FullName -Destination $cachedZip
+ $cachedZip=Join-Path $work 'package.zip'
+ if($info.remote){Receive-UpdateRemote $info.packagePath $cachedZip 104857600}else{Copy-Item -LiteralPath $zipInfo.FullName -Destination $cachedZip}
  if((Get-FileHash -LiteralPath $cachedZip -Algorithm SHA256).Hash -ne $info.sha256){throw 'SHA-256 do ZIP nao confere. A copia sincronizada pode estar incompleta; aguarde a sincronizacao e tente de novo.'}
  $extract=Join-Path $work 'extracted';[void](New-Item -ItemType Directory -Path $extract)
  $archive=[IO.Compression.ZipFile]::OpenRead($cachedZip)

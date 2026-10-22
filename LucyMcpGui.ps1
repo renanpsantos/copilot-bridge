@@ -14,7 +14,8 @@ if(!$SmokeTest){
 $script:operation=$null
 $script:dirty=$false
 $script:updateInfo=$null
-$script:updateSource=''
+$githubManifest='https://github.com/renanpsantos/copilot-bridge/releases/latest/download/version.json'
+$script:updateSource=$githubManifest
 $script:updating=$false
 $updateSettingsFile=Join-Path $DataDirectory 'updates.json'
 $form=New-Object Windows.Forms.Form
@@ -107,17 +108,19 @@ $openLog=Button-At $runTab 'Abrir log' 590 262 180
 $guide=Label-At $runTab "No Copilot Studio: adicione um servidor MCP com a URL acima.`r`nAutenticacao: Chave de API > Cabecalho > Authorization.`r`nUse Copiar chave MCP e cole o valor completo na conexao.`r`nApos reiniciar a publicacao, abra uma nova sessao de teste." 20 316 750 100
 $operationBox=New-Object Windows.Forms.TextBox;$operationBox.Multiline=$true;$operationBox.ReadOnly=$true;$operationBox.ScrollBars='Vertical';$operationBox.SetBounds(20,430,750,80);$runTab.Controls.Add($operationBox)
 [void](Label-At $updateTab ('Versao instalada: v'+$appVersion) 20 20 750 32)
-[void](Label-At $updateTab 'Selecione o version.json na pasta corporativa sincronizada pelo OneDrive/SharePoint.' 20 66 750 50)
+[void](Label-At $updateTab 'Atualize pelo GitHub ou selecione version.json em uma pasta corporativa sincronizada.' 20 66 750 50)
 $updateSourceBox=Text-At $updateTab 20 120 600;$updateSourceBox.ReadOnly=$true
+$updateSourceBox.Text=$script:updateSource
 $selectSource=Button-At $updateTab 'Escolher...' 634 118 136
 $checkUpdate=Button-At $updateTab 'Verificar atualizacoes' 20 176 240 40
 $installUpdate=Button-At $updateTab 'Instalar e reiniciar' 276 176 240 40;$installUpdate.Enabled=$false
+$githubSource=Button-At $updateTab 'Usar GitHub' 532 176 238 40
 $updateState=Label-At $updateTab 'Nenhuma verificacao realizada.' 20 238 750 50
 $updateNotes=New-Object Windows.Forms.TextBox;$updateNotes.Multiline=$true;$updateNotes.ReadOnly=$true;$updateNotes.ScrollBars='Vertical';$updateNotes.SetBounds(20,305,750,132);$updateTab.Controls.Add($updateNotes)
 [void](Label-At $updateTab 'A atualizacao encerra a publicacao. Configuracoes e tokens serao preservados.' 20 454 750 50)
 $updateLogButton=Button-At $updateTab 'Abrir resultado da atualizacao' 20 488 315
 $footer=Label-At $form 'Pronto para configurar. Nenhuma publicacao e iniciada automaticamente.' 24 650 785 45;$footer.Anchor='Bottom,Left,Right'
-$script:formButtons=@($startButton,$stopButton,$saveButton,$ngrokInstall,$verifyButton,$checkUpdate,$selectSource)
+$script:formButtons=@($startButton,$stopButton,$saveButton,$ngrokInstall,$verifyButton,$checkUpdate,$selectSource,$githubSource)
 function Refresh-State {
  try{
   $state=Read-State;$bp=$null;$np=$null
@@ -215,9 +218,14 @@ $selectSource.Add_Click({
  }}finally{$d.Dispose()}
 })
 $checkUpdate.Add_Click({try{Begin-Operation 'update-check'}catch{Notify $_.Exception.Message $true}})
+$githubSource.Add_Click({try{
+ Protect-Directory;$script:updateSource=$githubManifest;$updateSourceBox.Text=$script:updateSource
+ Save-Json @{manifestPath=$script:updateSource} $updateSettingsFile
+ $script:updateInfo=$null;$installUpdate.Enabled=$false;$updateState.Text='GitHub selecionado. Clique em Verificar atualizacoes.'
+}catch{Notify $_.Exception.Message $true}})
 $installUpdate.Add_Click({try{
  if(!$script:updateInfo.available){throw 'Verifique se ha uma versao nova primeiro.'}
- $confirm=[Windows.Forms.MessageBox]::Show($form,('Instalar v'+$script:updateInfo.version+' da pasta selecionada? A publicacao sera parada e esta janela sera reiniciada.'),'Atualizar Lucy MCP','YesNo','Question')
+ $confirm=[Windows.Forms.MessageBox]::Show($form,('Instalar v'+$script:updateInfo.version+' da fonte selecionada? A publicacao sera parada e esta janela sera reiniciada.'),'Atualizar Lucy MCP','YesNo','Question')
  if($confirm -eq 'Yes'){Begin-Operation 'update-prepare'}
 }catch{Notify $_.Exception.Message $true}})
 $updateLogButton.Add_Click({$file=Join-Path $DataDirectory 'update-result.json';if(Test-Path -LiteralPath $file){Start-Process notepad.exe -ArgumentList ('"'+$file+'"')}else{Notify 'Nenhuma atualizacao aplicada ainda.'}})

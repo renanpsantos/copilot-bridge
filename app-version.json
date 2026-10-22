@@ -1,5 +1,5 @@
 {
   "name": "Lucy MCP",
-  "version": "0.3.2",
-  "release_notes": "Adiciona logo de conexao no cabecalho e icone do programa. Mantem a protecao de instancia unica e o atualizador por pasta corporativa."
+  "version": "0.3.3",
+  "release_notes": "Atualizacoes diretas pelo GitHub publico, sem login dos N1, com verificacao SHA-256. Mantem a opcao de pasta corporativa, o logo e a interface unica."
 }

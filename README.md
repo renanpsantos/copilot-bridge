@@ -1,8 +1,12 @@
 # Lucy MCP CLI — POC Windows
 
-## Versao e atualizacoes pela pasta corporativa
+## Versao e atualizacoes
 
-Esta distribuicao e a **v0.3.2**. A versao fica centralizada em `app-version.json` e aparece no titulo da janela, no status do CLI e nos diagnosticos do adaptador. O historico esta em `CHANGELOG.md`.
+Esta distribuicao e a **v0.3.3**. A versao fica centralizada em `app-version.json` e aparece no titulo da janela, no status do CLI e nos diagnosticos do adaptador. O historico esta em `CHANGELOG.md`.
+
+O repositorio publico e https://github.com/renanpsantos/copilot-bridge. A partir da v0.3.3, a aba Atualizacoes consulta o GitHub por padrao, sem login ou token. Clique Verificar atualizacoes e, quando houver uma versao mais nova, Instalar e reiniciar. Para voltar ao GitHub depois de usar uma pasta, clique Usar GitHub. O manifesto fica em https://github.com/renanpsantos/copilot-bridge/releases/latest/download/version.json; nao e necessario um Gist. Cada manifesto gerado pelo build aponta para o ZIP da versao exata, evitando misturar releases durante o download.
+
+Para migrar de v0.3.2 ou anterior, extraia uma vez o novo ZIP completo ou use a atualizacao por pasta ja existente, colocando ZIP e version.json juntos. O atualizador antigo ainda nao le enderecos HTTPS. As proximas atualizacoes podem ser feitas diretamente pelo GitHub. O codigo e os pacotes deste repositorio sao publicos; configuracoes e tokens continuam apenas no perfil Windows de cada pessoa.
 
 A interface permite uma unica janela por usuario, sessao Windows e pasta de dados. Abrir novamente pelo executavel ou atalho traz a janela existente para frente e restaura se estiver minimizada. Isso tambem vale para outra copia da instalacao usando o mesmo perfil. Fechar a janela permite uma nova abertura normal. Essa protecao esta disponivel a partir da v0.3.1; feche janelas de versoes anteriores antes de instalar.
 

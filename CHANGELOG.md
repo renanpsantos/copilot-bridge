@@ -1,5 +1,11 @@
 # Historico de versoes
 
+## 0.3.3 - 2026-10-22
+
+- Atualizacao direta pelo GitHub publico, sem conta ou token dos N1.
+- Manifesto da ultima release e download do ZIP por HTTPS, com limites de tamanho e validacao SHA-256.
+- Opcao Usar GitHub na interface; a pasta corporativa continua disponivel.
+
 ## 0.3.2 - 2026-10-22
 
 - Logo de conexao no cabecalho e icone da janela, da barra de tarefas e do executavel.

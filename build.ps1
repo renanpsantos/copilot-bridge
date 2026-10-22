@@ -47,6 +47,7 @@ try{
  [void][IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive,$inventory,'LucyMcpCli/package-files.json',[IO.Compression.CompressionLevel]::Optimal)
 }finally{$archive.Dispose()}
 $manifest=@{version=$metadata.version;package='LucyMcpCli-fixed-portable.zip';sha256=(Get-FileHash -LiteralPath $zipPath -Algorithm SHA256).Hash;release_notes=$metadata.release_notes;built_at=[DateTime]::UtcNow.ToString('o')}
+$manifest.download_url='https://github.com/renanpsantos/copilot-bridge/releases/download/v'+$metadata.version+'/'+$manifest.package
 # Copy the package first, then the manifest, also when publishing to a sync folder.
 Copy-Item -LiteralPath $zipPath -Destination (Join-Path $OutputDirectory $manifest.package) -Force
 [IO.File]::WriteAllText((Join-Path $OutputDirectory 'version.json'),($manifest|ConvertTo-Json -Depth 5))
